@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -55,10 +56,16 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
     private String url_RetrieveUserById = "http://2dev4u.com/dev/markpollution/RetrieveUserById.php?id_user=";
     private String url_InsertComment = "http://2dev4u.com/dev/markpollution/InsertComment.php";
     private String url_RetrieveCommentById = "http://2dev4u.com/dev/markpollution/RetrieveCommentById.php?id_po=";
+    private String url_CheckUserRatedOrNot = "http://2dev4u.com/dev/markpollution/CheckUserRatedOrNot.php?id_user=";
+    private String url_InsertRate = "http://2dev4u.com/dev/markpollution/InsertRate.php";
+    private String url_UpdateRate = "http://2dev4u.com/dev/markpollution/UpdateRate.php";
+    private String url_RetrieveRateByUser = "http://2dev4u.com/dev/markpollution/RetrieveRateByUser.php?id_user=";
+    private String url_SumRate = "http://2dev4u.com/dev/markpollution/SumRateByPo.php?id_po=";
     private GoogleMap gMap;
     private double lat, lng;
     private String id_po;
     private List<Comment> listComment = new ArrayList<>();
+    private boolean isFirstTimeShowRate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +76,9 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
         getPoInfo();
         sendComment();
         retrieveComments();
+        checkUserRatedOrNotToInsertOrUpdate();
+        showRateByUser();
+        sumRate();
     }
 
     private void initView() {
@@ -277,5 +287,133 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
         LinearLayoutManager layout = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerViewComment.setLayoutManager(layout);
         recyclerViewComment.setAdapter(new CommentRecyclerViewAdapter(this, listComment));
+    }
+
+    private void checkUserRatedOrNotToInsertOrUpdate(){
+            ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                @Override
+                public void onRatingChanged(RatingBar ratingBar, final float rating, boolean fromUser) {
+                    // if it's not the first time show rate ==> insert OR update
+                    if(!isFirstTimeShowRate){
+                        // Check user has rated or not
+                        String completed_urlCheckUserRatedOrNot = url_CheckUserRatedOrNot + getUserID() + "&id_po=" + id_po;
+                        StringRequest strReq = new StringRequest(Request.Method.GET, completed_urlCheckUserRatedOrNot, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                if(response.equals("User hasn't rated")){
+                                    // insert rate
+                                    insertRate(rating);
+                                }else{
+                                    // edit rate
+                                    updateRate(rating);
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                                Log.e("Volley", error.getMessage());
+                            }
+                        });
+
+                        Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
+                    }
+                    isFirstTimeShowRate = false;
+                }
+            });
+    }
+
+    private void insertRate(final float rate){
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url_InsertRate, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Toast.makeText(DetailReportActivity.this, response, Toast.LENGTH_SHORT).show();
+                    sumRate();
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("Volley", error.getMessage());
+                }
+            }){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put("id_po", id_po);
+                    params.put("id_user", getUserID());
+                    params.put("rate",Integer.toString((int)rate));
+
+                    return params;
+                }
+            };
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(stringRequest);
+    }
+
+    private void updateRate(final float rate){
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url_UpdateRate, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Toast.makeText(DetailReportActivity.this, response, Toast.LENGTH_SHORT).show();
+                sumRate();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Volley", error.getMessage());
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<>();
+                params.put("id_po", id_po);
+                params.put("id_user", getUserID());
+                params.put("rate",Integer.toString((int)rate));
+
+                return params;
+            }
+        };
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(stringRequest);
+    }
+
+    private void showRateByUser() {
+        String completed_url_RetrieveRateByUser = url_RetrieveRateByUser + getUserID() + "&id_po=" + id_po;
+        StringRequest strReq = new StringRequest(Request.Method.GET, completed_url_RetrieveRateByUser, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if(!response.equals("no row match")){
+                    isFirstTimeShowRate = true;
+                    ratingBar.setRating(Float.valueOf(response));
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Volley", error.getMessage());
+            }
+        });
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
+    }
+
+    private void sumRate(){
+        StringRequest stringReq = new StringRequest(Request.Method.GET, url_SumRate + id_po, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                tvRate.setText(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Volley_SumRate", error.getMessage());
+            }
+        });
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(stringReq);
     }
 }

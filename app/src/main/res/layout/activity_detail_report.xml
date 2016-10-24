@@ -59,10 +59,10 @@
             android:text="This is report title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/imageViewDetail"
+            android:layout_below="@+id/ratingBar"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="10dp"
+            android:layout_marginBottom="4dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textStyle="normal|bold"
             android:textColor="@color/colorPrimaryDark" />
@@ -113,19 +113,10 @@
             android:id="@+id/textViewRateDetail"
             android:textStyle="normal|italic"
             android:textColor="@color/colorAccent"
-            android:layout_below="@+id/imageViewResolved"
+            android:layout_below="@+id/imageViewDetail"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-
-        <RatingBar
-            android:id="@+id/ratingBar"
-            style="@style/Widget.AppCompat.RatingBar.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/textViewRateDetail"
-            android:layout_toLeftOf="@+id/textViewRateDetail"
-            android:layout_toStartOf="@+id/textViewRateDetail"
-            android:layout_marginRight="4dp"/>
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="16dp"/>
 
         <TextView
             android:text="Thermal Pollution"
@@ -171,6 +162,19 @@
             android:layout_alignParentStart="true"
             android:hint="type your comment here..."
             android:layout_marginTop="8dp"/>
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1.0"
+            android:layout_below="@+id/imageViewDetail"
+            android:layout_toLeftOf="@+id/textViewRateDetail"
+            android:layout_toStartOf="@+id/textViewRateDetail"
+            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
+            />
 
     </RelativeLayout>
 </ScrollView>

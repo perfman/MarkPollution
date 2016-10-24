@@ -9,16 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.project.markpollution.Interfaces.VolleyCallback;
 import com.project.markpollution.Objects.Comment;
-import com.project.markpollution.Objects.User;
 import com.project.markpollution.R;
 import com.squareup.picasso.Picasso;
 
@@ -28,7 +25,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,8 +37,7 @@ public class CommentRecyclerViewAdapter extends RecyclerView.Adapter<CommentRecy
 //    private List<User> listUser = new ArrayList<>();
     private Context mContext;
     private String id_po;
-    private String url_RetrieveUserByComment = "http://2dev4u.com/dev/markpollution/RetrieveUserByComment.php?id_po=";
-    private String url_RetrieveUsers = "http://2dev4u.com/dev/markpollution/RetrieveUsers.php";
+//    private String url_RetrieveUserByComment = "http://2dev4u.com/dev/markpollution/RetrieveUserByComment.php?id_po=";
     private String url_RetrieveUserById = "http://2dev4u.com/dev/markpollution/RetrieveUserById.php?id_user=";
 
     public CommentRecyclerViewAdapter(Context mContext, List<Comment> listComment/*, String id_po*/) {

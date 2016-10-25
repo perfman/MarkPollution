@@ -61,6 +61,10 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
     private String url_UpdateRate = "http://2dev4u.com/dev/markpollution/UpdateRate.php";
     private String url_RetrieveRateByUser = "http://2dev4u.com/dev/markpollution/RetrieveRateByUser.php?id_user=";
     private String url_SumRate = "http://2dev4u.com/dev/markpollution/SumRateByPo.php?id_po=";
+    private String url_InsertSpam = "http://2dev4u.com/dev/markpollution/InsertSpam.php";
+    private String url_CheckUserSpamOrNot = "http://2dev4u.com/dev/markpollution/CheckUserSpamOrNot.php?id_user=";
+    private String url_InsertResolve = "http://2dev4u.com/dev/markpollution/InsertResolve.php";
+    private String url_CheckUserCheckResolveOrNot = "http://2dev4u.com/dev/markpollution/CheckUserCheckResolvedOrNot.php?id_user=";
     private GoogleMap gMap;
     private double lat, lng;
     private String id_po;
@@ -79,6 +83,10 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
         checkUserRatedOrNotToInsertOrUpdate();
         showRateByUser();
         sumRate();
+        insertSpam();
+        showSpamStatusWhenStartup();
+        showResolveStatusWhenStartup();
+        insertResolve();
     }
 
     private void initView() {
@@ -415,5 +423,134 @@ public class DetailReportActivity extends AppCompatActivity implements OnMapRead
         });
 
         Volley.newRequestQueue(DetailReportActivity.this).add(stringReq);
+    }
+
+    private void insertSpam() {
+        ivSpam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StringRequest strReq = new StringRequest(Request.Method.POST, url_InsertSpam, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("You have unchecked spam")){
+                            setIconSpam(false);
+                        }else if(response.equals("Spam successful")){
+                            setIconSpam(true);
+                        }
+                        Toast.makeText(DetailReportActivity.this, response, Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Volley_insertSpam", error.getMessage());
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        HashMap<String, String> params = new HashMap<>();
+                        params.put("id_po", id_po);
+                        params.put("id_user", getUserID());
+                        return params;
+                    }
+                };
+
+                Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
+            }
+        });
+    }
+
+    private void setIconSpam(boolean spam){
+        if(spam){
+            ivSpam.setImageResource(R.drawable.ic_spam);
+        }else{
+            ivSpam.setImageResource(R.drawable.ic_spam_grey);
+        }
+    }
+
+    private void setIconResolve(boolean resolved){
+        if(resolved){
+            ivResolved.setImageResource(R.drawable.ic_has_resolved);
+        }else{
+            ivResolved.setImageResource(R.drawable.ic_has_resolved_grey);
+        }
+    }
+
+    private void showSpamStatusWhenStartup() {
+        String completed_url_CheckUserSpamOrNot = url_CheckUserSpamOrNot + getUserID() + "&id_po=" + id_po;
+        StringRequest strReq = new StringRequest(Request.Method.GET, completed_url_CheckUserSpamOrNot, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if(response.equals("User has checked spam")){
+                    setIconSpam(true);
+                }else if(response.equals("User hasn't checked spam")){
+                    setIconSpam(false);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
+    }
+
+    private void insertResolve(){
+        ivResolved.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StringRequest strReq = new StringRequest(Request.Method.POST, url_InsertResolve, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("You have unchecked resolve")){
+                            setIconResolve(false);
+                        }else if(response.equals("Check resolved successful")){
+                            setIconResolve(true);
+                        }
+                        Toast.makeText(DetailReportActivity.this, response, Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Volley_InsertResolve", error.getMessage());
+                    }
+                }){
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        HashMap<String, String> params = new HashMap<>();
+                        params.put("id_user", getUserID());
+                        params.put("id_po", id_po);
+                        return params;
+                    }
+                };
+
+                Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
+            }
+        });
+    }
+
+    private void showResolveStatusWhenStartup() {
+        String completed_url_CheckUserCheckResolveorNot = url_CheckUserCheckResolveOrNot + getUserID() + "&id_po=" + id_po;
+        StringRequest strReq = new StringRequest(Request.Method.GET, completed_url_CheckUserCheckResolveorNot, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if(response.equals("User has checked resolve")){
+                    setIconResolve(true);
+                }else if(response.equals("User hasn't checked resolve")){
+                    setIconResolve(false);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailReportActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Volley_CheckResolve", error.getMessage());
+            }
+        });
+
+        Volley.newRequestQueue(DetailReportActivity.this).add(strReq);
     }
 }

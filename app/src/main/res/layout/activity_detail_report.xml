@@ -100,7 +100,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_spam"
+            app:srcCompat="@drawable/ic_spam_grey"
             android:id="@+id/imageViewSpam"
             android:layout_below="@+id/textViewEmailDetail"
             android:layout_alignParentRight="true"

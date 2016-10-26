@@ -21,9 +21,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,13 +48,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.project.markpollution.DetailReportActivity;
-import com.project.markpollution.MainActivity;
+import com.project.markpollution.Objects.Category;
 import com.project.markpollution.Objects.PollutionPoint;
 import com.project.markpollution.R;
 import com.project.markpollution.SendReportActivity;
 import com.project.markpollution.CustomAdapter.*;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import static com.project.markpollution.MainActivity.listPo;
 
 /**
  * IDE: Android Studio
@@ -69,6 +86,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private HashMap<String, Uri> images = new HashMap<>();
+    private Spinner spnCate;
+    private String url_retrieve_cate = "http://indi.com.vn/dev/markpollution/RetrieveCategory.php";
+    private String url_RetrievePollutionByCateID = "http://indi.com.vn/dev/markpollution/RetrievePollutionBy_CateID.php?id_cate=";
+    private List<Category> listCate;
+    private List<PollutionPoint> listPoByCateID;
 
     public MapsFragment() {
     }
@@ -96,6 +118,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
             Toast.makeText(mContext, "Location not supported in this device", Toast.LENGTH_SHORT).show();
         }
 
+        loadSpinnerCate();
+
         return rootView;
     }
 
@@ -103,6 +127,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         fabCheck = (FloatingActionButton) rootView.findViewById(R.id.fabCheck);
         imgGetLocation = (ImageView) rootView.findViewById(R.id.imgGetLocation);
+        spnCate = (Spinner) rootView.findViewById(R.id.spnCateMap);
 
         mapFragment.getMapAsync(this);
         fabCheck.setOnClickListener(this);
@@ -131,9 +156,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         mMap = googleMap;
 
         // extract markers from List<> into Google Map
-        for(PollutionPoint po: MainActivity.listPo){
-            addMarker(googleMap, po);
-        }
+        filterPollutionByCate(googleMap);
 
         googleMap.setInfoWindowAdapter(new PopupInfoWindowAdapter(getContext(), LayoutInflater.from(getContext()), images));
         googleMap.setOnInfoWindowClickListener(this);
@@ -341,7 +364,106 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         Intent intent = new Intent(getActivity(), DetailReportActivity.class);
         intent.putExtra("id_po", marker.getTag().toString());
         startActivity(intent);
+    }
 
+    private void loadSpinnerCate() {
+        StringRequest stringReq = new StringRequest(Request.Method.GET, url_retrieve_cate, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    JSONArray arr = jObj.getJSONArray("result");
+                    listCate = new ArrayList<>();
+                    listCate.add(0, new Category("0", "Show All"));
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject cate = arr.getJSONObject(i);
+                        listCate.add(new Category(cate.getString("id_cate"), cate.getString("name_cate")));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
+                ArrayAdapter<Category> adapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item, listCate);
+                adapter.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+                spnCate.setAdapter(adapter);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Volley.newRequestQueue(mContext).add(stringReq);
+    }
+
+    // Each time filter pollutionPoints by Category. It requests to server => Maybe I'll load data from static List<PollutionPoint>
+    // Get pollution points by cateID and extract into map
+    private void getPollutionByCateID(String CateID) {
+        String completed_RetrievePollutionByCateID = url_RetrievePollutionByCateID + CateID;
+        JsonObjectRequest objReq = new JsonObjectRequest(Request.Method.GET, completed_RetrievePollutionByCateID, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            JSONArray arr = response.getJSONArray("result");
+                            listPoByCateID = new ArrayList<>();
+                            for (int i = 0; i < arr.length(); i++) {
+                                JSONObject po = arr.getJSONObject(i);
+                                String id_po = po.getString("id_po");
+                                String id_cate = po.getString("id_cate");
+                                String id_user = po.getString("id_user");
+                                double lat = po.getDouble("lat");
+                                double lng = po.getDouble("lng");
+                                String title = po.getString("title");
+                                String desc = po.getString("desc");
+                                String image = po.getString("image");
+                                String time = po.getString("time");
+
+                                listPoByCateID.add(new PollutionPoint(id_po, id_cate, id_user, lat, lng, title, desc, image, time));
+                            }
+                            // extract markers in list<> markers into the map
+                            mMap.clear();
+                            for (PollutionPoint po : listPoByCateID) {
+                                addMarker(mMap, po);
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(po.getLat(), po.getLng()), 12));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(mContext, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Volley.newRequestQueue(mContext).add(objReq);
+    }
+
+    private void filterPollutionByCate(final GoogleMap googleMap){
+        spnCate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Category cate = (Category) spnCate.getItemAtPosition(i);
+                String CateID = cate.getId();
+
+                if(!CateID.equals("0")){
+                    getPollutionByCateID(CateID);
+                }else{
+                    googleMap.clear();
+                    for (PollutionPoint po : listPo) {
+                        addMarker(googleMap, po);
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(po.getLat(), po.getLng()), 12));
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
     }
 }

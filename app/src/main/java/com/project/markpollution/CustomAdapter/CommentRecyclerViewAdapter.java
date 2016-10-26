@@ -38,7 +38,7 @@ public class CommentRecyclerViewAdapter extends RecyclerView.Adapter<CommentRecy
     private Context mContext;
     private String id_po;
 //    private String url_RetrieveUserByComment = "http://2dev4u.com/dev/markpollution/RetrieveUserByComment.php?id_po=";
-    private String url_RetrieveUserById = "http://2dev4u.com/dev/markpollution/RetrieveUserById.php?id_user=";
+    private String url_RetrieveUserById = "http://indi.com.vn/dev/markpollution/RetrieveUserById.php?id_user=";
 
     public CommentRecyclerViewAdapter(Context mContext, List<Comment> listComment/*, String id_po*/) {
         this.mContext = mContext;

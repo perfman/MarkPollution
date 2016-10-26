@@ -71,8 +71,8 @@ public class SendReportActivity extends AppCompatActivity implements OnMapReadyC
     private ImageView ivCamera;
     private Spinner spCate;
     // Server's URL to interact with database
-    private String url_retrieve_cate = "http://2dev4u.com/dev/markpollution/RetrieveCategory.php";
-    private String url_insert_pollutionPoint = "http://2dev4u.com/dev/markpollution/InsertPollutionPoint.php";
+    private String url_retrieve_cate = "http://indi.com.vn/dev/markpollution/RetrieveCategory.php";
+    private String url_insert_pollutionPoint = "http://indi.com.vn/dev/markpollution/InsertPollutionPoint.php";
 
     private ArrayList<Category> listCate;
     private FirebaseStorage storage;

@@ -29,10 +29,10 @@ import java.util.Map;
 public class SigninActivity extends AppCompatActivity  implements GoogleApiClient.OnConnectionFailedListener {
     private GoogleApiClient googleApiClient;
     private SignInButton signInButton;
-    private String url_insert = "http://2dev4u.com/dev/markpollution/InsertUser.php";
-    private String url_checkUser = "http://2dev4u.com/dev/markpollution/RetrieveUserByEmail.php?email=";
+    private String url_insert = "http://indi.com.vn/dev/markpollution/InsertUser.php";
+    private String url_checkUser = "http://indi.com.vn/dev/markpollution/RetrieveUserByEmail.php?email=";
 
-    private String url_retrive_pollutionPoint = "http://2dev4u.com/dev/markpollution/RetrievePollutionPoint.php";
+    private String url_retrive_pollutionPoint = "http://indi.com.vn/dev/markpollution/RetrievePollutionPoint.php";
 //    private ProgressDialog progressDialog;
     private Intent intent;
 

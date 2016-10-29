@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         switch (id) {
             //Replacing the main content with ContentFragment Which is our Inbox View;
             case R.id.reportmanagement:
-                Toast.makeText(getApplicationContext(), "Reportmanagement Selected", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, ReportManagementActivity.class));
                 return true;
             case R.id.seriousreport:
                 Toast.makeText(getApplicationContext(), "Seriousreport Selected", Toast.LENGTH_SHORT).show();

@@ -15,19 +15,19 @@
       },
       "oauth_client": [
         {
+          "client_id": "62807479997-prsb5rotub8h4hqt08u5r3t07er2kmpl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.project.markpollution",
+            "certificate_hash": "40570E1C58E0768867379472BC11CD2CBCFF1A9C"
+          }
+        },
+        {
           "client_id": "62807479997-cs58io93nhqei0islfh92vh5rvt5ofdh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.project.markpollution",
             "certificate_hash": "04C59C04DDF3CC28FC43BB905036B5C798BF09DD"
-          }
-        },
-        {
-          "client_id": "62807479997-j0rm3ct3tcufclbm4p9ft4rlmuuos02q.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.project.markpollution",
-            "certificate_hash": "077F1FA1FC9441FC260060125A53ED854EABE603"
           }
         },
         {
